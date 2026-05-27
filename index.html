@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FBA货件管理</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell" id="appShell">
+      <aside class="sidebar" aria-label="侧边导航">
+        <div class="brand">
+          <div class="brand-mark">A</div>
+          <div class="brand-text">
+            <strong>ANSU</strong>
+            <span>安速捷通</span>
+          </div>
+        </div>
+        <nav class="side-nav" id="sideNav"></nav>
+        <button class="collapse-bottom" id="collapseSidebar" aria-label="收起侧边栏">
+          <span class="icon">‹</span>
+        </button>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button class="menu-btn" id="menuToggle" aria-label="切换菜单">☰</button>
+            <div class="main-tabs" id="mainTabs" aria-label="模块导航"></div>
+          </div>
+          <div class="top-actions">
+            <button class="primary small" id="quickMenu">直客录单</button>
+            <button class="bell" id="bellBtn" aria-label="通知">
+              <span>🔔</span>
+              <em>1</em>
+            </button>
+            <button class="profile" id="profileBtn" aria-label="用户菜单">
+              <span class="avatar">天</span>
+              <span>天朗</span>
+            </button>
+          </div>
+        </header>
+
+        <section class="workspace">
+          <section class="filter-panel" aria-label="查询条件">
+            <div class="status-tabs" id="statusTabs">
+              <button class="status-tab active" data-status="all">全部<span>(77440)</span></button>
+              <button class="status-tab" data-status="pushed">已推单<span>(76856)</span></button>
+              <button class="status-tab" data-status="unpushed">未推单<span>(584)</span></button>
+            </div>
+
+            <form class="filters" id="filterForm">
+              <label>
+                <span>运单号</span>
+                <input name="waybill" placeholder="支持批量(空格/逗号隔开)" />
+              </label>
+              <label>
+                <span>FBA单号</span>
+                <input name="fba" placeholder="支持批量(空格/逗号隔开)" />
+              </label>
+              <label>
+                <span>截止修改时间</span>
+                <div class="range">
+                  <input name="deadlineStart" type="date" aria-label="截止开始日期" />
+                  <b>→</b>
+                  <input name="deadlineEnd" type="date" aria-label="截止结束日期" />
+                </div>
+              </label>
+              <label>
+                <span>标识</span>
+                <input name="mark" placeholder="标识" />
+              </label>
+              <label>
+                <span>客户预计送达周</span>
+                <input name="customerWeek" placeholder="请选择周" />
+              </label>
+              <label>
+                <span>精算预计送达周</span>
+                <input name="settlementWeek" placeholder="请选择周" />
+              </label>
+              <label>
+                <span>推送平台</span>
+                <select name="platform">
+                  <option value="">推送平台</option>
+                  <option>暂无推送</option>
+                  <option>Amazon</option>
+                  <option>Walmart</option>
+                </select>
+              </label>
+              <label>
+                <span>推单类型</span>
+                <select name="pushType">
+                  <option value="">推单类型</option>
+                  <option>自动推单</option>
+                  <option>人工推单</option>
+                </select>
+              </label>
+              <label>
+                <span>渠道</span>
+                <select name="channel">
+                  <option value="">渠道</option>
+                  <option>美森快船</option>
+                  <option>以星快船</option>
+                  <option>盐田普船</option>
+                  <option>空派专线</option>
+                  <option>卡派渠道</option>
+                </select>
+              </label>
+              <label>
+                <span>实际送仓时间</span>
+                <div class="range">
+                  <input name="deliveredStart" type="date" aria-label="送仓开始日期" />
+                  <b>→</b>
+                  <input name="deliveredEnd" type="date" aria-label="送仓结束日期" />
+                </div>
+              </label>
+              <label>
+                <span>卖家是否可修改</span>
+                <select name="editable">
+                  <option value="">卖家是否可修改</option>
+                  <option>卖家未授权</option>
+                  <option>可修改</option>
+                  <option>不可修改</option>
+                </select>
+              </label>
+              <label>
+                <span>送仓时间是否为空</span>
+                <select name="emptyDelivered">
+                  <option value="">送仓时间是否为空</option>
+                  <option value="yes">是</option>
+                  <option value="no">否</option>
+                </select>
+              </label>
+              <label>
+                <span>派送方式</span>
+                <input name="deliveryType" placeholder="派送方式" />
+              </label>
+              <div class="filter-actions">
+                <button class="primary" type="submit">搜索</button>
+                <button class="ghost" type="button" id="resetBtn">重置</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="table-panel" aria-label="FBA货件列表">
+            <div class="table-toolbar">
+              <div class="left-tools">
+                <button class="primary" id="exportBtn">导出</button>
+                <span class="selected-count" id="selectedCount">已选 0 条</span>
+              </div>
+              <div class="right-tools">
+                <button class="icon-btn" id="refreshBtn" aria-label="刷新">↻</button>
+                <button class="icon-btn" id="settingsBtn" aria-label="表格设置">⚙</button>
+                <div class="settings-menu" id="settingsMenu" hidden>
+                  <label><input type="checkbox" id="compactToggle" /> 紧凑行高</label>
+                  <label><input type="checkbox" id="freezeToggle" checked /> 固定表头</label>
+                </div>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="index">#</th>
+                    <th class="check"><input type="checkbox" id="checkAll" aria-label="全选" /></th>
+                    <th>运单号</th>
+                    <th>预警来源</th>
+                    <th>推送平台</th>
+                    <th>推单类型</th>
+                    <th>标识</th>
+                    <th>FBA单号</th>
+                    <th>渠道</th>
+                    <th>最新轨迹</th>
+                    <th>轨迹更新时间</th>
+                    <th>ETA</th>
+                    <th>ETD</th>
+                    <th>卖家是否可修改</th>
+                    <th>实际送仓时间</th>
+                    <th>客户预计送达周</th>
+                    <th>参考预计送达周</th>
+                    <th>精算预计送达周</th>
+                    <th>截止修改时间</th>
+                    <th>创建人</th>
+                    <th>处理状态</th>
+                    <th>预警时间</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <span id="totalText">共 77440 条</span>
+              <button class="page-nav" id="prevPage" aria-label="上一页">‹</button>
+              <div class="page-list" id="pageList"></div>
+              <button class="page-nav" id="nextPage" aria-label="下一页">›</button>
+              <select id="pageSize">
+                <option value="50">50 条/页</option>
+                <option value="100" selected>100 条/页</option>
+                <option value="200">200 条/页</option>
+              </select>
+              <label class="jump">跳至<input id="jumpPage" inputmode="numeric" />页</label>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <aside class="drawer" id="detailDrawer" aria-hidden="true">
+      <div class="drawer-head">
+        <div>
+          <span>货件详情</span>
+          <strong id="drawerTitle">FBA单号</strong>
+        </div>
+        <button class="icon-btn" id="closeDrawer" aria-label="关闭">×</button>
+      </div>
+      <div class="drawer-body" id="drawerBody"></div>
+    </aside>
+
+    <div class="modal-backdrop" id="modalBackdrop" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <h2 id="modalTitle">处理货件</h2>
+        <p id="modalText"></p>
+        <label class="modal-field">
+          处理备注
+          <textarea id="processRemark" rows="4" placeholder="填写本次处理说明"></textarea>
+        </label>
+        <div class="modal-actions">
+          <button class="ghost" id="cancelProcess">取消</button>
+          <button class="primary" id="confirmProcess">确认处理</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
