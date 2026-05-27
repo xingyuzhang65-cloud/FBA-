@@ -495,6 +495,12 @@ function confirmProcess() {
   showToast("处理状态已更新");
 }
 
+function parseDate(str) {
+  if (!str) return null;
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+}
+
 async function exportRows() {
   const rows = state.selectedIds.size ? state.rows.filter((row) => state.selectedIds.has(row.id)) : [...state.filtered];
   if (!rows.length) {
@@ -502,17 +508,54 @@ async function exportRows() {
     return;
   }
   try {
-    const res = await fetch("/api/export", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(rows)
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet("FBA货件管理");
+
+    const headers = [
+      "运单号", "预警来源", "推送平台", "标识", "fba 号码",
+      "渠道", "最新轨迹", "轨迹更新时间", "ETA", "ETD", "卖家是否可修改",
+      "实际送仓时间", "客户预计送达周", "参考预计送达周", "精算预计送达周",
+      "截止修改时间", "创建人", "处理状态", "预警时间"
+    ];
+
+    const headerRow = ws.addRow(headers);
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
     });
-    if (!res.ok) throw new Error("导出失败");
-    const blob = await res.blob();
+    ws.views = [{ state: "frozen", ySplit: 1 }];
+
+    const widths = [20, 12, 12, 8, 17, 12, 15, 16, 10, 10, 13, 21, 17, 17, 17, 21, 14, 12, 21];
+    widths.forEach((w, i) => ws.getColumn(i + 1).width = w);
+
+    ws.getColumn(1).numFmt = "@";
+    ws.getColumn(5).numFmt = "@";
+    ws.getColumn(8).numFmt = "yyyy-MM-dd HH:mm:ss";
+    ws.getColumn(9).numFmt = "yyyy-MM-dd";
+    ws.getColumn(10).numFmt = "yyyy-MM-dd";
+    ws.getColumn(12).numFmt = "yyyy-MM-dd HH:mm:ss";
+    ws.getColumn(16).numFmt = "yyyy-MM-dd HH:mm:ss";
+    ws.getColumn(19).numFmt = "yyyy-MM-dd HH:mm:ss";
+
+    rows.forEach((row) => {
+      ws.addRow([
+        row.waybill, row.warningSource || null, row.platform || null,
+        row.mark || null, row.fba, row.channel || null,
+        row.latestTrack || null, parseDate(row.trackUpdatedAt),
+        parseDate(row.eta), parseDate(row.etd), row.editable || null,
+        parseDate(row.deliveredAt), row.customerWeek || null,
+        row.referenceWeek || null, row.settlementWeek || null,
+        parseDate(row.deadline), row.creator || null,
+        row.status || null, parseDate(row.warningAt)
+      ]);
+    });
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = "";
+    anchor.download = `FBA货件管理_${new Date().toISOString().slice(0, 10)}.xlsx`;
     anchor.click();
     URL.revokeObjectURL(url);
     showToast(`已导出 ${rows.length} 条数据`);
