@@ -106,6 +106,7 @@ function cacheElements() {
 
 function buildRows() {
   const platforms = ["暂无推送", "Amazon", "Walmart"];
+  const salespeople = ["陈凯", "刘敏", "周航", "许琳"];
   const creators = ["郑志强", "郑志强_义乌", "王思雨", "李晓"];
   const channels = ["美森快船", "以星快船", "盐田普船", "空派专线", "卡派渠道"];
   const trackNodes = ["已创建货件", "已揽收", "已入仓", "已装柜", "已开船", "目的港清关中", "已预约派送"];
@@ -129,6 +130,7 @@ function buildRows() {
       trackUpdatedAt: `2026-05-${String(20 + (i % 7)).padStart(2, "0")} ${String(8 + (i % 10)).padStart(2, "0")}:${String(5 + (i % 50)).padStart(2, "0")}:00`,
       eta: `2026-06-${String(8 + (i % 14)).padStart(2, "0")}`,
       etd: `2026-05-${String(27 + (i % 4)).padStart(2, "0")}`,
+      salesperson: salespeople[i % salespeople.length],
       editable: i % 9 === 0 ? "可修改" : "卖家未授权",
       deliveredAt: hasDelivery ? `2026-05-${String(18 + (i % 8)).padStart(2, "0")} 09:${String(10 + i).padStart(2, "0")}:20` : "",
       customerWeek: i % 7 === 0 ? "2026-W22" : "",
@@ -328,6 +330,7 @@ function applyFilters() {
     if (query.customerWeek && !row.customerWeek.includes(query.customerWeek.trim())) return false;
     if (query.settlementWeek && !row.settlementWeek.includes(query.settlementWeek.trim())) return false;
     if (query.deliveryType && !row.platform.includes(query.deliveryType.trim())) return false;
+    if (!matchMulti(row.salesperson, query.salesperson)) return false;
     return true;
   });
 
@@ -366,6 +369,7 @@ function renderTable() {
           <td>${row.trackUpdatedAt}</td>
           <td>${row.eta}</td>
           <td>${row.etd}</td>
+          <td>${row.salesperson}</td>
           <td>${row.editable}</td>
           <td>${row.deliveredAt}</td>
           <td>${row.customerWeek}</td>
@@ -377,7 +381,7 @@ function renderTable() {
           <td>${row.warningAt}</td>
         </tr>`
       )
-      .join("") || `<tr><td colspan="22">暂无匹配数据</td></tr>`;
+      .join("") || `<tr><td colspan="23">暂无匹配数据</td></tr>`;
 
   const pageRows = currentPageRows();
   els.checkAll.checked = pageRows.length > 0 && pageRows.every((row) => state.selectedIds.has(row.id));
@@ -454,6 +458,7 @@ function openDrawer(id) {
     ["轨迹更新时间", row.trackUpdatedAt],
     ["ETA", row.eta],
     ["ETD", row.etd],
+    ["业务员", row.salesperson],
     ["卖家是否可修改", row.editable],
     ["客户预计送达周", row.customerWeek || "-"],
     ["精算预计送达周", row.settlementWeek || "-"],
@@ -513,7 +518,7 @@ async function exportRows() {
 
     const headers = [
       "运单号", "预警来源", "推送平台", "标识", "fba 号码",
-      "渠道", "最新轨迹", "轨迹更新时间", "ETA", "ETD", "卖家是否可修改",
+      "渠道", "最新轨迹", "轨迹更新时间", "ETA", "ETD", "业务员", "卖家是否可修改",
       "实际送仓时间", "客户预计送达周", "参考预计送达周", "精算预计送达周",
       "截止修改时间", "创建人", "处理状态", "预警时间"
     ];
@@ -525,7 +530,7 @@ async function exportRows() {
     });
     ws.views = [{ state: "frozen", ySplit: 1 }];
 
-    const widths = [20, 12, 12, 8, 17, 12, 15, 16, 10, 10, 13, 21, 17, 17, 17, 21, 14, 12, 21];
+    const widths = [20, 12, 12, 8, 17, 12, 15, 16, 10, 10, 12, 13, 21, 17, 17, 17, 21, 14, 12, 21];
     widths.forEach((w, i) => ws.getColumn(i + 1).width = w);
 
     ws.getColumn(1).numFmt = "@";
@@ -533,16 +538,16 @@ async function exportRows() {
     ws.getColumn(8).numFmt = "yyyy-MM-dd HH:mm:ss";
     ws.getColumn(9).numFmt = "yyyy-MM-dd";
     ws.getColumn(10).numFmt = "yyyy-MM-dd";
-    ws.getColumn(12).numFmt = "yyyy-MM-dd HH:mm:ss";
-    ws.getColumn(16).numFmt = "yyyy-MM-dd HH:mm:ss";
-    ws.getColumn(19).numFmt = "yyyy-MM-dd HH:mm:ss";
+    ws.getColumn(13).numFmt = "yyyy-MM-dd HH:mm:ss";
+    ws.getColumn(17).numFmt = "yyyy-MM-dd HH:mm:ss";
+    ws.getColumn(20).numFmt = "yyyy-MM-dd HH:mm:ss";
 
     rows.forEach((row) => {
       ws.addRow([
         row.waybill, row.warningSource || null, row.platform || null,
         row.mark || null, row.fba, row.channel || null,
         row.latestTrack || null, parseDate(row.trackUpdatedAt),
-        parseDate(row.eta), parseDate(row.etd), row.editable || null,
+        parseDate(row.eta), parseDate(row.etd), row.salesperson || null, row.editable || null,
         parseDate(row.deliveredAt), row.customerWeek || null,
         row.referenceWeek || null, row.settlementWeek || null,
         parseDate(row.deadline), row.creator || null,
