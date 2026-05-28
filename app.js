@@ -330,7 +330,7 @@ function applyFilters() {
     if (query.customerWeek && !row.customerWeek.includes(query.customerWeek.trim())) return false;
     if (query.settlementWeek && !row.settlementWeek.includes(query.settlementWeek.trim())) return false;
     if (query.deliveryType && !row.platform.includes(query.deliveryType.trim())) return false;
-    if (!matchMulti(row.salesperson, query.salesperson)) return false;
+    if (query.salesperson && row.salesperson !== query.salesperson) return false;
     return true;
   });
 
