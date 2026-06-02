@@ -628,7 +628,7 @@
                 <thead>
                   <tr>
                     <th style="width: 38%">文件名称</th>
-                    <th style="width: 20%">所属部门</th>
+                    <th style="width: 20%">部门</th>
                     <th style="width: 24%">可见权限</th>
                     <th style="width: 18%">操作</th>
                   </tr>
@@ -771,8 +771,8 @@
             </label>
 
             <label>
-              <span class="field-label">所属部门</span>
-              <el-select v-model="dialogForm.departmentName" placeholder="请选择所属部门" style="width: 100%">
+              <span class="field-label">部门</span>
+              <el-select v-model="dialogForm.departmentName" placeholder="请选择部门" style="width: 100%">
                 <el-option v-for="department in fixedDepartments" :key="department" :label="department" :value="department"></el-option>
               </el-select>
             </label>
