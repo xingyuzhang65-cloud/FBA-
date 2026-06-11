@@ -1,0 +1,1331 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>安速系统 - 帮助中心重构交互原型</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus@2.8.8/dist/index.css" />
+    <style>
+      :root {
+        --ans-blue: #1677ff;
+        --ans-blue-deep: #0958d9;
+        --ans-bg: #f3f6fb;
+        --ans-sidebar: #f4f7f9;
+        --ans-line: #e5eaf2;
+        --ans-text: #1f2d3d;
+        --ans-muted: #7a8797;
+        --ans-green: #2fa66a;
+        --ans-red: #e5484d;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        color: var(--ans-text);
+        background: var(--ans-bg);
+        font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+        letter-spacing: 0;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+
+      #app {
+        min-height: 100vh;
+      }
+
+      .app-shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: 56px minmax(0, 1fr);
+      }
+
+      .topbar {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 0 22px;
+        background: #fff;
+        border-bottom: 1px solid var(--ans-line);
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+      }
+
+      .brand-mark {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #f24f43 0 48%, #f7aa2a 49% 100%);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .user-pill {
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 12px;
+        border: 1px solid var(--ans-line);
+        border-radius: 999px;
+        color: #526070;
+        background: #fff;
+      }
+
+      .page {
+        min-height: 0;
+        padding: 18px;
+        display: grid;
+        grid-template-columns: minmax(460px, 0.92fr) minmax(680px, 1.45fr);
+        gap: 18px;
+      }
+
+      .panel {
+        min-width: 0;
+        background: #fff;
+        border: 1px solid var(--ans-line);
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(24, 42, 74, 0.06);
+        overflow: hidden;
+      }
+
+      .panel-head {
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 0 18px;
+        border-bottom: 1px solid var(--ans-line);
+      }
+
+      .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+      }
+
+      .panel-title small {
+        color: var(--ans-muted);
+        font-weight: 400;
+      }
+
+      .admin-body {
+        padding: 16px;
+      }
+
+      .filter-bar {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+        gap: 12px;
+        align-items: end;
+        padding: 14px;
+        background: #f7f9fc;
+        border: 1px solid var(--ans-line);
+        border-radius: 8px;
+      }
+
+      .field-label {
+        display: block;
+        margin-bottom: 7px;
+        color: #596575;
+        font-size: 13px;
+      }
+
+      .filter-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .table-tools {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 16px 0 10px;
+      }
+
+      .tool-left {
+        display: flex;
+        gap: 8px;
+      }
+
+      .doc-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        border: 1px solid var(--ans-line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .doc-table th,
+      .doc-table td {
+        height: 42px;
+        padding: 0 10px;
+        text-align: left;
+        border-bottom: 1px solid var(--ans-line);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .doc-table th {
+        color: #667387;
+        background: #f8fafc;
+        font-weight: 600;
+      }
+
+      .doc-table tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .permission-demo {
+        margin-top: 14px;
+        display: grid;
+        gap: 9px;
+        padding: 12px;
+        border: 1px solid #c7ddff;
+        background: #f5f9ff;
+        border-radius: 8px;
+      }
+
+      .permission-demo strong {
+        color: var(--ans-blue-deep);
+      }
+
+      .tag-line {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        min-height: 24px;
+      }
+
+      .dialog-grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .mutual-hint {
+        margin-top: 8px;
+        color: #6d7788;
+        font-size: 13px;
+      }
+
+      .upload-box {
+        height: 116px;
+        display: grid;
+        place-items: center;
+        border: 1px dashed #b8c7d9;
+        border-radius: 8px;
+        color: #5d6b7c;
+        background: #fbfdff;
+      }
+
+      .upload-box strong {
+        color: var(--ans-blue);
+      }
+
+      .hall-panel {
+        display: grid;
+        grid-template-rows: 54px minmax(0, 1fr);
+        min-height: calc(100vh - 92px);
+      }
+
+      .hall {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr);
+      }
+
+      .help-sidebar {
+        min-height: 0;
+        background: var(--ans-sidebar);
+        border-right: 1px solid var(--ans-line);
+        display: grid;
+        grid-template-rows: 58px minmax(0, 1fr);
+      }
+
+      .help-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 18px;
+        font-size: 18px;
+        font-weight: 700;
+        border-bottom: 1px solid #e1e7ef;
+      }
+
+      .menu-tree {
+        overflow: auto;
+        padding: 10px 0 18px;
+      }
+
+      .menu-module {
+        margin-bottom: 4px;
+      }
+
+      .module-btn,
+      .doc-btn {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: #344054;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .module-btn {
+        height: 42px;
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr) 20px;
+        align-items: center;
+        gap: 7px;
+        padding: 0 16px;
+        font-weight: 600;
+      }
+
+      .module-btn:hover,
+      .module-btn.is-open {
+        color: var(--ans-blue);
+        background: rgba(22, 119, 255, 0.08);
+      }
+
+      .doc-list {
+        display: grid;
+      }
+
+      .doc-btn {
+        min-height: 40px;
+        display: grid;
+        grid-template-columns: 24px minmax(0, 1fr);
+        align-items: center;
+        gap: 8px;
+        padding: 0 12px 0 34px;
+        color: #475569;
+      }
+
+      .doc-btn span:last-child {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .doc-btn:hover,
+      .doc-btn.is-active {
+        color: var(--ans-blue);
+        background: #e7f1ff;
+      }
+
+      .doc-btn.is-active {
+        border-right: 3px solid var(--ans-blue);
+        font-weight: 700;
+      }
+
+      .content-scroll {
+        min-height: 0;
+        height: calc(100vh - 146px);
+        overflow: auto;
+        scroll-behavior: smooth;
+        background: #fff;
+      }
+
+      .reader-grid {
+        width: min(100%, 1120px);
+        min-height: 100%;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, 8fr) minmax(240px, 4fr);
+        gap: 30px;
+        padding: 28px 28px 56px;
+      }
+
+      .reader-main {
+        min-width: 0;
+      }
+
+      .loading-card {
+        min-height: 360px;
+        display: grid;
+        align-content: start;
+        gap: 18px;
+        padding-top: 20px;
+      }
+
+      .doc-title {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.28;
+        font-weight: 800;
+      }
+
+      .meta {
+        margin-top: 9px;
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        color: var(--ans-muted);
+        font-size: 13px;
+      }
+
+      .ai-card {
+        margin: 22px 0 26px;
+        display: grid;
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 12px;
+        padding: 16px;
+        border: 1px solid #cfe5ff;
+        border-radius: 8px;
+        background: #ebf5ff;
+      }
+
+      .ai-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: #fff;
+        color: var(--ans-blue);
+      }
+
+      .ai-card p {
+        margin: 4px 0 0;
+        color: #415166;
+        line-height: 1.72;
+      }
+
+      .summary-label {
+        display: inline-flex;
+        align-items: center;
+        height: 22px;
+        padding: 0 7px;
+        border-radius: 4px;
+        color: #fff;
+        background: var(--ans-blue);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .doc-section {
+        scroll-margin-top: 18px;
+        padding-bottom: 22px;
+      }
+
+      .doc-section h2 {
+        margin: 0 0 12px;
+        font-size: 19px;
+        line-height: 1.35;
+      }
+
+      .doc-section p {
+        margin: 0 0 12px;
+        color: #344054;
+        line-height: 1.85;
+      }
+
+      .doc-section ul {
+        margin: 0 0 12px;
+        padding-left: 20px;
+        color: #344054;
+        line-height: 1.85;
+      }
+
+      .outline-wrap {
+        min-width: 0;
+      }
+
+      .outline {
+        position: sticky;
+        top: 20px;
+        padding: 14px 0 14px 18px;
+        border-left: 1px solid var(--ans-line);
+      }
+
+      .outline-title {
+        margin-bottom: 10px;
+        color: #667387;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .outline a {
+        display: block;
+        position: relative;
+        padding: 8px 12px;
+        color: #667387;
+        text-decoration: none;
+        border-radius: 6px;
+        line-height: 1.38;
+        cursor: pointer;
+      }
+
+      .outline a:hover,
+      .outline a.is-active {
+        color: var(--ans-blue);
+        background: #eef6ff;
+      }
+
+      .outline a.is-active::before {
+        content: "";
+        position: absolute;
+        left: -19px;
+        top: 8px;
+        width: 3px;
+        height: calc(100% - 16px);
+        border-radius: 999px;
+        background: var(--ans-blue);
+      }
+
+      .status-strip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #5f6b7a;
+        font-size: 13px;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--ans-green);
+      }
+
+      .el-dialog {
+        border-radius: 8px;
+      }
+
+      @media (max-width: 1180px) {
+        .page {
+          grid-template-columns: 1fr;
+        }
+
+        .hall-panel {
+          min-height: 760px;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .page {
+          padding: 10px;
+        }
+
+        .filter-bar,
+        .hall,
+        .reader-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .help-sidebar {
+          min-height: 320px;
+        }
+
+        .reader-grid {
+          padding: 20px;
+        }
+
+        .outline {
+          position: static;
+          border-left: 0;
+          border-top: 1px solid var(--ans-line);
+          padding: 14px 0 0;
+        }
+
+        .content-scroll {
+          height: 620px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="app-shell">
+        <header class="topbar">
+          <div class="brand">
+            <span class="brand-mark">A</span>
+            <span>ANSU 安速系统 / 帮助中心重构原型</span>
+          </div>
+          <div class="header-actions">
+            <el-input v-model="globalKeyword" :prefix-icon="Search" placeholder="全局搜索文档、部门、角色" style="width: 280px" clearable></el-input>
+            <span class="user-pill"><el-icon><User /></el-icon> 天帆</span>
+          </div>
+        </header>
+
+        <main class="page">
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-title">
+                <el-icon><Setting /></el-icon>
+                <span>后台文档配置</span>
+                <small>新增/编辑弹窗权限演示</small>
+              </div>
+              <el-button type="primary" :icon="Plus" @click="openDocDialog()">新增</el-button>
+            </div>
+
+            <div class="admin-body">
+              <div class="filter-bar">
+                <label>
+                  <span class="field-label">文件名称</span>
+                  <el-input v-model="adminFilters.fileName" placeholder="请输入文件名称" clearable></el-input>
+                </label>
+                <label>
+                  <span class="field-label">部门</span>
+                  <el-select v-model="adminFilters.department" placeholder="请选择部门" style="width: 100%" clearable>
+                    <el-option v-for="dept in fixedDepartments" :key="dept" :label="dept" :value="dept"></el-option>
+                  </el-select>
+                </label>
+                <label>
+                  <span class="field-label">可见权限</span>
+                  <el-select v-model="adminFilters.roles" multiple collapse-tags collapse-tags-tooltip placeholder="请选择可见角色" style="width: 100%" clearable>
+                    <el-option v-for="role in roleOptions" :key="role.value" :label="role.label" :value="role.value"></el-option>
+                  </el-select>
+                </label>
+                <label>
+                  <span class="field-label">客户是否可见</span>
+                  <el-select v-model="adminFilters.customerVisible" placeholder="全部" style="width: 100%" clearable>
+                    <el-option label="是" value="是"></el-option>
+                    <el-option label="否" value="否"></el-option>
+                  </el-select>
+                </label>
+                <label>
+                  <span class="field-label">操作人</span>
+                  <el-select v-model="adminFilters.operator" placeholder="请选择操作人" style="width: 100%" clearable>
+                    <el-option label="天帆" value="天帆"></el-option>
+                    <el-option label="周航" value="周航"></el-option>
+                    <el-option label="李晓" value="李晓"></el-option>
+                  </el-select>
+                </label>
+                <div class="filter-actions">
+                  <el-button type="primary" :icon="Search">搜索</el-button>
+                  <el-button @click="resetFilters">重置</el-button>
+                </div>
+              </div>
+
+              <div class="table-tools">
+                <div class="tool-left">
+                  <el-button type="primary" :icon="Plus" @click="openDocDialog()">新增</el-button>
+                  <el-button :icon="Delete">删除</el-button>
+                  <el-button :icon="Tickets" @click="openLogDialog()">日志</el-button>
+                  <el-button :icon="Download">下载</el-button>
+                </div>
+                <span class="status-strip"><i class="dot"></i> 更新时间跟随上传成功刷新</span>
+              </div>
+
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%">文件名称</th>
+                    <th style="width: 9%">部门</th>
+                    <th style="width: 15%">可见权限</th>
+                    <th style="width: 11%">上传时间</th>
+                    <th style="width: 11%">更新时间</th>
+                    <th style="width: 8%">操作人</th>
+                    <th style="width: 8%">客户可见</th>
+                    <th style="width: 18%">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="row in visibleAdminRows" :key="row.docId">
+                    <td>{{ row.fileName }}</td>
+                    <td>{{ row.departmentName }}</td>
+                    <td>
+                      <el-tag v-for="role in row.visible_roles" :key="role" size="small" style="margin-right: 4px">{{ roleLabel(role) }}</el-tag>
+                    </td>
+                    <td>{{ row.uploadTime }}</td>
+                    <td>{{ row.updateTime }}</td>
+                    <td>{{ row.operator }}</td>
+                    <td style="text-align: center">{{ row.customerVisible ? '是' : '否' }}</td>
+                    <td>
+                      <el-button link type="primary" @click="openDocDialog(row)">编辑</el-button>
+                      <el-button link type="primary" style="margin-left: 4px" @click="openLogDialog(row.docId)">日志</el-button>
+                      <el-button link type="danger" style="margin-left: 4px">删除</el-button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="permission-demo">
+                <strong>核心逻辑实时状态</strong>
+                <div class="tag-line">
+                  当前弹窗选择：
+                  <el-tag v-for="role in dialogForm.visibleRoles" :key="role" type="primary">{{ roleLabel(role) }}</el-tag>
+                  <el-tag v-if="dialogForm.visibleRoles.length === 0" type="info">未选择</el-tag>
+                </div>
+                <div>
+                  规则：点击 <b>全选</b> 可一键选中全部角色；再次点击可取消全选。
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel hall-panel">
+            <div class="panel-head">
+              <div class="panel-title">
+                <el-icon><Reading /></el-icon>
+                <span>用户前端大厅</span>
+                <small>按部门剪枝、首次自动激活、异步正文、悬浮大纲</small>
+              </div>
+              <span class="status-strip"><i class="dot"></i> 当前角色：{{ currentUserRoles.map(roleLabel).join("、") }}</span>
+            </div>
+
+            <div class="hall">
+              <aside class="help-sidebar">
+                <div class="help-title">
+                  <el-icon><Collection /></el-icon>
+                  <span>帮助中心</span>
+                </div>
+                <nav class="menu-tree" aria-label="帮助文档树状菜单">
+                  <div v-for="module in visibleModules" :key="module.moduleId" class="menu-module">
+                    <button class="module-btn" :class="{ 'is-open': openModuleId === module.moduleId }" @click="toggleModule(module.moduleId)">
+                      <el-icon><component :is="module.iconComponent" /></el-icon>
+                      <span>{{ module.moduleName }}</span>
+                      <el-icon><ArrowDown v-if="openModuleId === module.moduleId" /><ArrowRight v-else /></el-icon>
+                    </button>
+                    <div v-show="openModuleId === module.moduleId" class="doc-list">
+                      <button
+                        v-for="doc in module.children"
+                        :key="doc.docId"
+                        class="doc-btn"
+                        :class="{ 'is-active': activeDocId === doc.docId }"
+                        @click="activateDoc(doc.docId)"
+                      >
+                        <el-icon><Document /></el-icon>
+                        <span>{{ doc.fileName }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </nav>
+              </aside>
+
+              <section ref="contentScrollRef" class="content-scroll" @scroll="onContentScroll">
+                <div class="reader-grid">
+                  <article class="reader-main">
+                    <div v-if="docLoading" class="loading-card">
+                      <el-skeleton :rows="8" animated />
+                    </div>
+                    <template v-else-if="activeDoc">
+                      <h1 class="doc-title">{{ activeDoc.fileName }}</h1>
+                      <div class="meta">
+                        <span>最后修改时间：{{ activeDoc.updateTime }}</span>
+                        <span>作者：{{ activeDoc.author }}</span>
+                      </div>
+
+                      <div class="ai-card">
+                        <div class="ai-icon"><el-icon><MagicStick /></el-icon></div>
+                        <div>
+                          <span class="summary-label">AI 速览</span>
+                          <p>{{ activeDoc.aiSummary.slice(0, 200) }}</p>
+                        </div>
+                      </div>
+
+                      <section
+                        v-for="section in activeDoc.sections"
+                        :id="section.id"
+                        :key="section.id"
+                        :ref="setSectionRef"
+                        class="doc-section"
+                        :data-section-id="section.id"
+                      >
+                        <h2>{{ section.title }}</h2>
+                        <p v-for="paragraph in section.paragraphs" :key="paragraph">{{ paragraph }}</p>
+                        <ul v-if="section.points">
+                          <li v-for="point in section.points" :key="point">{{ point }}</li>
+                        </ul>
+                      </section>
+                    </template>
+                  </article>
+
+                  <aside class="outline-wrap">
+                    <div class="outline" aria-label="悬浮大纲">
+                      <div class="outline-title">文档大纲</div>
+                      <a
+                        v-for="section in activeDoc?.sections || []"
+                        :key="section.id"
+                        :class="{ 'is-active': activeSectionId === section.id }"
+                        @click="scrollToSection(section.id)"
+                      >
+                        {{ section.title }}
+                      </a>
+                    </div>
+                  </aside>
+                </div>
+              </section>
+            </div>
+          </section>
+        </main>
+
+        <el-dialog v-model="docDialogVisible" width="620px" title="新增/编辑文档" destroy-on-close>
+          <div class="dialog-grid">
+            <label>
+              <span class="field-label">文件名称</span>
+              <el-input
+                v-model="dialogForm.fileName"
+                maxlength="50"
+                show-word-limit
+                placeholder="请输入文件名称"
+                :class="{ 'is-error': nameDuplicated }"
+                @blur="validateFileName"
+              ></el-input>
+              <div v-if="nameDuplicated" class="mutual-hint" style="color: var(--ans-red)">该文件名在系统已存在</div>
+            </label>
+
+            <label>
+              <span class="field-label">部门</span>
+              <el-select v-model="dialogForm.departmentName" placeholder="请选择部门" style="width: 100%">
+                <el-option v-for="department in fixedDepartments" :key="department" :label="department" :value="department"></el-option>
+              </el-select>
+            </label>
+
+            <label>
+              <span class="field-label">可见权限</span>
+              <el-select
+                v-model="dialogForm.visibleRoles"
+                multiple
+                collapse-tags
+                collapse-tags-tooltip
+                placeholder="请选择可见角色"
+                style="width: 100%"
+              >
+                <el-option
+                  :key="'check-all'"
+                  :label="isAllRolesSelected ? '取消全选' : '全选'"
+                  :value="'__check_all__'"
+                  style="border-bottom: 1px solid #e5eaf2; font-weight: 600; color: var(--ans-blue)"
+                  @click.prevent="toggleCheckAll"
+                ></el-option>
+                <el-option
+                  v-for="role in roleOptions"
+                  :key="role.value"
+                  :label="role.label"
+                  :value="role.value"
+                ></el-option>
+              </el-select>
+              <div class="mutual-hint">支持多选角色，勾选后对应角色的用户即可看到该文档。</div>
+            </label>
+
+            <label>
+              <span class="field-label">客户是否可见</span>
+              <div style="margin-top: 6px">
+                <el-radio-group v-model="dialogForm.customerVisible">
+                  <el-radio :value="false">否</el-radio>
+                  <el-radio :value="true">是</el-radio>
+                </el-radio-group>
+              </div>
+            </label>
+
+            <label>
+              <span class="field-label">文档上传</span>
+              <div class="upload-box">
+                <div>
+                  <strong>拖拽 PDF / DOCX 到此处</strong>
+                  <div>限制格式 .pdf、.docx，大小小于等于 50MB</div>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <template #footer>
+            <el-button @click="docDialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="saveDialog">保存配置</el-button>
+          </template>
+        </el-dialog>
+
+        <el-dialog v-model="logDialogVisible" width="780px" title="操作日志" destroy-on-close>
+          <div style="margin-bottom: 14px; display: flex; align-items: center; gap: 12px">
+            <span style="color: #596575; font-size: 13px; white-space: nowrap">筛选文档：</span>
+            <el-select v-model="logFilterDocId" placeholder="全部文档" style="width: 260px" clearable @change="onLogFilterChange">
+              <el-option label="全部文档" value=""></el-option>
+              <el-option
+                v-for="row in visibleAdminRows"
+                :key="row.docId"
+                :label="row.fileName"
+                :value="row.docId"
+              ></el-option>
+            </el-select>
+            <span style="color: var(--ans-muted); font-size: 13px; margin-left: auto">共 {{ filteredLogs.length }} 条记录</span>
+          </div>
+          <el-table :data="filteredLogs" border stripe max-height="420" style="width: 100%">
+            <el-table-column prop="fileName" label="文件名称" min-width="160" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="action" label="操作类型" width="100">
+              <template #default="{ row }">
+                <el-tag
+                  :type="row.action === '上传文档' ? 'success' : row.action === '修改配置' ? 'warning' : 'primary'"
+                  size="small"
+                >{{ row.action }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="detail" label="操作详情" min-width="180" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="operator" label="操作人" width="90"></el-table-column>
+            <el-table-column prop="time" label="操作时间" width="160" sortable></el-table-column>
+          </el-table>
+          <template #footer>
+            <el-button @click="logDialogVisible = false">关闭</el-button>
+          </template>
+        </el-dialog>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/element-plus@2.8.8/dist/index.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@element-plus/icons-vue@2.3.1/dist/index.iife.min.js"></script>
+    <script>
+      const { createApp, computed, nextTick, onMounted, reactive, ref, watch } = Vue;
+      const Icons = ElementPlusIconsVue;
+
+      const mockLogs = [
+        { logId: "LOG_001", docId: "DOC_2026_001", fileName: "安速客户跟单操作手册", action: "上传文档", operator: "天帆", time: "2026-05-20 14:32:10", detail: "初次上传 PDF 文档，创建 v1.0" },
+        { logId: "LOG_002", docId: "DOC_2026_001", fileName: "安速客户跟单操作手册", action: "修改配置", operator: "天帆", time: "2026-05-22 09:15:43", detail: "调整可见权限：新增业务专员角色" },
+        { logId: "LOG_003", docId: "DOC_2026_001", fileName: "安速客户跟单操作手册", action: "更新文档", operator: "天帆", time: "2026-06-01 16:08:27", detail: "重新上传 PDF，更新至 v1.1，补充异常处理章节" },
+        { logId: "LOG_004", docId: "DOC_2026_002", fileName: "运单异常跟进规范", action: "上传文档", operator: "周航", time: "2026-05-10 10:20:05", detail: "初次上传 DOCX 文档，创建 v1.0" },
+        { logId: "LOG_005", docId: "DOC_2026_002", fileName: "运单异常跟进规范", action: "修改配置", operator: "周航", time: "2026-05-28 11:44:51", detail: "变更部门归属，更新可见权限范围" },
+        { logId: "LOG_006", docId: "DOC_2026_003", fileName: "来款登记核销指南", action: "上传文档", operator: "李晓", time: "2026-05-08 08:55:30", detail: "初次上传 PDF 文档，创建 v1.0" },
+        { logId: "LOG_007", docId: "DOC_2026_003", fileName: "来款登记核销指南", action: "修改配置", operator: "李晓", time: "2026-05-15 13:22:18", detail: "调整客户可见状态，新增操作说明" },
+        { logId: "LOG_008", docId: "DOC_2026_003", fileName: "来款登记核销指南", action: "更新文档", operator: "李晓", time: "2026-05-25 17:36:02", detail: "补充异常账款处理流程，更新至 v1.1" },
+        { logId: "LOG_009", docId: "DOC_2026_004", fileName: "角色权限配置说明", action: "上传文档", operator: "天帆", time: "2026-05-18 15:10:44", detail: "初次上传 PDF 文档，创建 v1.0" },
+        { logId: "LOG_010", docId: "DOC_2026_004", fileName: "角色权限配置说明", action: "修改配置", operator: "天帆", time: "2026-06-01 10:05:33", detail: "调整可见角色范围，更新至 v1.1" },
+        { logId: "LOG_011", docId: "DOC_2026_005", fileName: "经营报表查看指南", action: "上传文档", operator: "王思雨", time: "2026-04-28 09:48:12", detail: "初次上传 PDF 文档，创建 v1.0" },
+        { logId: "LOG_012", docId: "DOC_2026_005", fileName: "经营报表查看指南", action: "更新文档", operator: "王思雨", time: "2026-05-10 14:30:09", detail: "更新数据口径和导出策略说明" }
+      ];
+
+      const mockResponse = {
+        status: "success",
+        data: [
+          {
+            moduleId: "MOD_WAYBILL",
+            moduleName: "业务部",
+            icon: "waybill-icon",
+            iconComponent: "Van",
+            children: [
+              {
+                docId: "DOC_2026_001",
+                fileName: "安速客户跟单操作手册",
+                author: "天帆",
+                uploadTime: "2026-05-20",
+                updateTime: "2026-06-01",
+                operator: "天帆",
+                departmentName: "业务部",
+                visible_roles: ["business_specialist", "operation_clerk", "finance_manager", "admin"],
+                customerVisible: true,
+                aiSummary:
+                  "本文档主要阐述了安速供应链系统中从客户下单、预报、轨迹追踪到最终签收的全链路跟单标准作业流程，旨在帮助跟单员快速上手异常处理模块，并明确每个节点的操作责任、时效要求与风险提示。",
+                sections: [
+                  {
+                    id: "waybill-flow",
+                    title: "一、系统流程图",
+                    paragraphs: [
+                      "客户下单后，系统会自动生成预报记录并进入运单跟踪链路。跟单员需要在预报、揽收、入仓、出库、派送几个关键节点持续核对轨迹。",
+                      "当轨迹缺失、预计到达周异常或客户资料不完整时，页面会生成待处理提醒，并在运单卡片上显示风险标记。"
+                    ],
+                    points: ["预报记录与业务运单一一关联。", "异常节点必须补充处理备注。", "处理完成后自动写入日志。"]
+                  },
+                  {
+                    id: "waybill-page",
+                    title: "1.1 运单页面",
+                    paragraphs: [
+                      "业务人员在此处核对基础数据，包括渠道、销售、客户预估到达周、参考预估到达周及最终精算到达周。",
+                      "系统支持批量筛选和状态标签联动，帮助跟单员优先处理高风险或即将超时的记录。"
+                    ]
+                  },
+                  {
+                    id: "waybill-exception",
+                    title: "1.2 异常处理",
+                    paragraphs: [
+                      "异常处理区会展示异常来源、触发时间、当前负责人和处理建议。用户提交处理说明后，状态会从待处理变更为已处理。",
+                      "若同一运单重复触发异常，系统会保留历史轨迹，便于复盘处理效率。"
+                    ]
+                  },
+                  {
+                    id: "waybill-faq",
+                    title: "1.3 常见问题",
+                    paragraphs: [
+                      "如客户反馈轨迹延迟，先核对最新轨迹更新时间，再联系渠道补充节点。若系统中 ETA 和客户口径不一致，以渠道最新回传为准。",
+                      "对于批量问题，可使用导出功能形成处理清单，并在完成后统一回填处理备注。"
+                    ]
+                  }
+                ]
+              },
+              {
+                docId: "DOC_2026_002",
+                fileName: "运单异常跟进规范",
+                author: "周航",
+                uploadTime: "2026-05-10",
+                updateTime: "2026-05-28",
+                operator: "周航",
+                departmentName: "业务部",
+                visible_roles: ["business_specialist"],
+                customerVisible: false,
+                aiSummary:
+                  "本文档面向业务专员说明异常运单的识别、分派、处理与复盘机制，帮助团队统一处理口径并减少重复沟通。",
+                sections: [
+                  { id: "exception-identify", title: "一、异常识别", paragraphs: ["系统根据轨迹缺口、渠道节点延迟、客户授权状态和预计到达周波动自动识别异常，并在列表中展示风险标签。"] },
+                  { id: "exception-assign", title: "二、责任分派", paragraphs: ["业务专员负责客户沟通，操作文员负责节点核实，管理人员负责超时督办。所有动作都需要进入日志。"] },
+                  { id: "exception-review", title: "三、处理复盘", paragraphs: ["每周按异常类型汇总，关注重复触发、超时关闭和客户二次反馈三类指标。"] }
+                ]
+              }
+            ]
+          },
+          {
+            moduleId: "MOD_FINANCE",
+            moduleName: "财务部",
+            icon: "finance-icon",
+            iconComponent: "Money",
+            children: [
+              {
+                docId: "DOC_2026_003",
+                fileName: "来款登记核销指南",
+                author: "李晓",
+                uploadTime: "2026-05-08",
+                updateTime: "2026-05-25",
+                operator: "李晓",
+                departmentName: "财务部",
+                visible_roles: ["finance_manager"],
+                customerVisible: false,
+                aiSummary: "本文档介绍财务角色进行来款登记、客户余额核销和异常账款处理的标准步骤。",
+                sections: [
+                  { id: "receipt-entry", title: "一、来款登记", paragraphs: ["财务人员录入客户、金额、币种、到账日期和付款凭证，系统自动生成待核销记录。"] },
+                  { id: "receipt-writeoff", title: "二、余额核销", paragraphs: ["选择对应客户余额后执行核销，系统会同步更新客户账期和可用余额。"] },
+                  { id: "receipt-risk", title: "三、异常账款", paragraphs: ["金额不一致或凭证缺失时进入异常队列，需补充说明后再次提交审核。"] }
+                ]
+              }
+            ]
+          },
+          {
+            moduleId: "MOD_CONFIG",
+            moduleName: "系统配置部",
+            icon: "config-icon",
+            iconComponent: "Tools",
+            children: [
+              {
+                docId: "DOC_2026_004",
+                fileName: "角色权限配置说明",
+                author: "天帆",
+                uploadTime: "2026-05-18",
+                updateTime: "2026-06-01",
+                operator: "天帆",
+                departmentName: "系统配置部",
+                visible_roles: ["operation_clerk", "admin"],
+                customerVisible: false,
+                aiSummary: "本文档说明角色字典、权限分配、可见范围配置与帮助文档授权之间的关系。",
+                sections: [
+                  { id: "role-dict", title: "一、角色字典", paragraphs: ["角色字典由系统统一维护，帮助中心仅消费角色值，不再维护行政部门绑定关系。"] },
+                  { id: "role-permission", title: "二、权限授权", paragraphs: ["当文档设置为具体角色时，用户角色与文档角色存在交集即可访问。"] },
+                  { id: "role-pruning", title: "三、菜单剪枝", paragraphs: ["若一级分类下没有任何可见文档，该分类不会渲染，避免用户看到空目录。"] }
+                ]
+              }
+            ]
+          },
+          {
+            moduleId: "MOD_REPORT",
+            moduleName: "数据分析部",
+            icon: "report-icon",
+            iconComponent: "DataAnalysis",
+            children: [
+              {
+                docId: "DOC_2026_005",
+                fileName: "经营报表查看指南",
+                author: "王思雨",
+                uploadTime: "2026-04-28",
+                updateTime: "2026-05-20",
+                operator: "王思雨",
+                departmentName: "数据分析部",
+                visible_roles: ["admin"],
+                customerVisible: false,
+                aiSummary: "本文档仅管理员可见，用于说明经营报表的数据口径、筛选方式和导出策略。",
+                sections: [
+                  { id: "report-scope", title: "一、数据口径", paragraphs: ["报表数据按业务日期聚合，支持按渠道、业务员、客户与模块维度切换。"] },
+                  { id: "report-export", title: "二、导出策略", paragraphs: ["导出前需要确认筛选条件，避免下载过大的明细数据。"] }
+                ]
+              }
+            ]
+          }
+        ]
+      };
+
+      const app = createApp({
+        setup() {
+          const globalKeyword = ref("");
+          const currentUserRoles = ref(["business_specialist", "operation_clerk"]);
+          const contentScrollRef = ref(null);
+          const sectionRefs = ref([]);
+          const activeDocId = ref("");
+          const activeDoc = ref(null);
+          const activeSectionId = ref("");
+          const openModuleId = ref("");
+          const docLoading = ref(false);
+          const docDialogVisible = ref(false);
+          const nameDuplicated = ref(false);
+          const logDialogVisible = ref(false);
+          const logFilterDocId = ref("");
+
+          const fixedDepartments = ["业务部", "操作部", "财务部", "客服部", "管理部", "系统配置部", "数据分析部"];
+          const roleOptions = [
+            { label: "业务专员", value: "business_specialist" },
+            { label: "操作文员", value: "operation_clerk" },
+            { label: "财务主管", value: "finance_manager" },
+            { label: "系统管理员", value: "admin" }
+          ];
+
+          const adminFilters = reactive({
+            fileName: "",
+            department: "",
+            roles: [],
+            customerVisible: "",
+            operator: ""
+          });
+
+          const dialogForm = reactive({
+            docId: "",
+            fileName: "",
+            departmentName: "业务部",
+            visibleRoles: [],
+            customerVisible: false
+          });
+
+          const visibleAdminRows = computed(() =>
+            mockResponse.data.flatMap((module) =>
+              module.children.map((doc) => ({
+                docId: doc.docId,
+                fileName: doc.fileName,
+                departmentName: doc.departmentName,
+                visible_roles: doc.visible_roles,
+                uploadTime: doc.uploadTime,
+                updateTime: doc.updateTime,
+                operator: doc.operator,
+                customerVisible: doc.customerVisible ?? false
+              }))
+            )
+          );
+
+          const filteredLogs = computed(() => {
+            if (!logFilterDocId.value) return mockLogs;
+            return mockLogs.filter((log) => log.docId === logFilterDocId.value);
+          });
+
+          const visibleModules = computed(() => {
+            const roles = currentUserRoles.value;
+            return mockResponse.data
+              .map((module) => ({
+                ...module,
+                children: module.children.filter((doc) => doc.visible_roles.some((role) => roles.includes(role)))
+              }))
+              .filter((module) => module.children.length > 0);
+          });
+
+          const isAllRolesSelected = computed(() =>
+            roleOptions.every((r) => dialogForm.visibleRoles.includes(r.value))
+          );
+
+          function toggleCheckAll() {
+            if (isAllRolesSelected.value) {
+              dialogForm.visibleRoles = [];
+            } else {
+              dialogForm.visibleRoles = roleOptions.map((r) => r.value);
+            }
+          }
+
+          watch(
+            () => dialogForm.visibleRoles,
+            (value) => {
+              if (value.includes("__check_all__")) {
+                dialogForm.visibleRoles = value.filter((v) => v !== "__check_all__");
+              }
+            }
+          );
+
+          function roleLabel(value) {
+            return roleOptions.find((role) => role.value === value)?.label || value;
+          }
+
+          function resetFilters() {
+            adminFilters.fileName = "";
+            adminFilters.department = "";
+            adminFilters.roles = [];
+            adminFilters.customerVisible = "";
+            adminFilters.operator = "";
+          }
+
+          function openDocDialog(row) {
+            nameDuplicated.value = false;
+            if (row) {
+              dialogForm.docId = row.docId;
+              dialogForm.fileName = row.fileName;
+              dialogForm.departmentName = row.departmentName;
+              dialogForm.visibleRoles = [...row.visible_roles];
+              dialogForm.customerVisible = row.customerVisible ?? false;
+            } else {
+              dialogForm.docId = "";
+              dialogForm.fileName = "新版帮助文档";
+              dialogForm.departmentName = "业务部";
+              dialogForm.visibleRoles = [];
+              dialogForm.customerVisible = false;
+            }
+            docDialogVisible.value = true;
+          }
+
+          function validateFileName() {
+            const duplicated = visibleAdminRows.value.some((row) => row.fileName === dialogForm.fileName && row.docId !== dialogForm.docId);
+            nameDuplicated.value = duplicated;
+          }
+
+          function saveDialog() {
+            validateFileName();
+            if (nameDuplicated.value) return;
+            ElementPlus.ElMessage.success("配置已保存，上传成功后更新时间会刷新为当前系统时间");
+            docDialogVisible.value = false;
+          }
+
+          function openLogDialog(docId) {
+            logFilterDocId.value = docId || "";
+            logDialogVisible.value = true;
+          }
+
+          function onLogFilterChange() {
+            // filter reacts via computed
+          }
+
+          function toggleModule(moduleId) {
+            openModuleId.value = openModuleId.value === moduleId ? "" : moduleId;
+          }
+
+          function findDoc(docId) {
+            for (const module of visibleModules.value) {
+              const doc = module.children.find((item) => item.docId === docId);
+              if (doc) return { module, doc };
+            }
+            return null;
+          }
+
+          async function activateDoc(docId) {
+            const result = findDoc(docId);
+            if (!result) return;
+            activeDocId.value = docId;
+            openModuleId.value = result.module.moduleId;
+            activeDoc.value = null;
+            activeSectionId.value = "";
+            docLoading.value = true;
+            await new Promise((resolve) => setTimeout(resolve, 420));
+            activeDoc.value = result.doc;
+            docLoading.value = false;
+            sectionRefs.value = [];
+            await nextTick();
+            activeSectionId.value = result.doc.sections[0]?.id || "";
+            if (contentScrollRef.value) contentScrollRef.value.scrollTop = 0;
+          }
+
+          function autoActivateFirstVisibleDoc() {
+            const firstModule = visibleModules.value[0];
+            const firstDoc = firstModule?.children?.[0];
+            if (!firstDoc) return;
+            openModuleId.value = firstModule.moduleId;
+            activateDoc(firstDoc.docId);
+          }
+
+          function setSectionRef(el) {
+            if (el && !sectionRefs.value.includes(el)) sectionRefs.value.push(el);
+          }
+
+          function onContentScroll() {
+            if (!contentScrollRef.value || docLoading.value || !activeDoc.value) return;
+            const containerTop = contentScrollRef.value.getBoundingClientRect().top;
+            let current = activeDoc.value.sections[0]?.id || "";
+            for (const el of sectionRefs.value) {
+              const top = el.getBoundingClientRect().top - containerTop;
+              if (top <= 84) current = el.dataset.sectionId;
+            }
+            activeSectionId.value = current;
+          }
+
+          function scrollToSection(sectionId) {
+            const target = sectionRefs.value.find((el) => el.dataset.sectionId === sectionId);
+            if (!target || !contentScrollRef.value) return;
+            contentScrollRef.value.scrollTo({
+              top: target.offsetTop - 18,
+              behavior: "smooth"
+            });
+          }
+
+          onMounted(() => {
+            setTimeout(() => {
+              autoActivateFirstVisibleDoc();
+            }, 260);
+          });
+
+          return {
+            ...Icons,
+            Search: Icons.Search,
+            Plus: Icons.Plus,
+            Delete: Icons.Delete,
+            Tickets: Icons.Tickets,
+            Download: Icons.Download,
+            globalKeyword,
+            currentUserRoles,
+            contentScrollRef,
+            activeDocId,
+            activeDoc,
+            activeSectionId,
+            openModuleId,
+            docLoading,
+            docDialogVisible,
+            nameDuplicated,
+            logDialogVisible,
+            logFilterDocId,
+            fixedDepartments,
+            roleOptions,
+            adminFilters,
+            dialogForm,
+            visibleAdminRows,
+            filteredLogs,
+            visibleModules,
+            isAllRolesSelected,
+            toggleCheckAll,
+            roleLabel,
+            resetFilters,
+            openDocDialog,
+            validateFileName,
+            saveDialog,
+            openLogDialog,
+            onLogFilterChange,
+            toggleModule,
+            activateDoc,
+            setSectionRef,
+            onContentScroll,
+            scrollToSection
+          };
+        }
+      });
+
+      Object.entries(Icons).forEach(([name, component]) => {
+        app.component(name, component);
+        app.component(name.toLowerCase(), component);
+      });
+
+      app.use(ElementPlus).mount("#app");
+    </script>
+  </body>
+</html>
